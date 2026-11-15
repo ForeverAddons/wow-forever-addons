@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: Boss Report
+## Notes: After each boss kill, posts the top damage and healing to party or raid chat (the same numbers Details! shows).
+## Author: Jahleel
+## Version: 0.1.0
+## SavedVariables: BossReportDB
+## Category: Combat
+
+Core.lua

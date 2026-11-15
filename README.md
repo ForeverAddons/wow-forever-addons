@@ -8,6 +8,7 @@ Addons I made for the **WoW Forever** client (interface 16001).
 | [DamageBot](#damagebot) | HealBot-style bars for enemies you're fighting, with your DoTs on them |
 | [Disenchant Odds](#disenchant-odds) | Disenchant results and chances in item tooltips |
 | [Death Reason](#death-reason) | When you die: your last 10 hits, who hit you and with what |
+| [Boss Report](#boss-report) | After each boss kill: top damage and healing posted to party or raid chat |
 
 ## Install
 
@@ -50,6 +51,17 @@ When you die, a window lists the hits you took (10 by default), killing blow at 
 before death, spell, attacker, damage and your health after each hit. It closes when you release
 your spirit. `/dreason` shows your last deaths, `/dreason test` a sample, `/dreason settings` for size
 and options. Attackers come from the game's death recap; older hits it doesn't cover show as "attacker unknown".
+
+## Boss Report
+
+After each boss kill, posts the fight's top 5 damage and healing to party or raid chat in one message,
+with each player's total and per-second amount and the fight length (or one line per player, with each
+player's share, if you prefer). The numbers come from the game's built-in
+damage meter, the same data Details! shows on Forever, and are posted once combat ends (the game hides
+them from addons until then). If several people in the group have it, only one posts (leader first).
+`/breport` opens its settings (also under Esc > Options > AddOns): on/off, damage, healing, wipes,
+players per list and where to post (party or raid, guild, say or just you), plus buttons to show the
+last fight's report to yourself or post it. `/breport help` lists the chat commands.
 
 ---
 
