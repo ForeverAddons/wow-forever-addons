@@ -9,6 +9,7 @@ Addons I made for the **WoW Forever** client (interface 16001).
 | [Disenchant Odds](#disenchant-odds) | Disenchant results and chances in item tooltips |
 | [Death Reason](#death-reason) | When you die: your last 10 hits, who hit you and with what |
 | [Boss Report](#boss-report) | After each boss kill: top damage and healing posted to party or raid chat |
+| [Loot Alert](#loot-alert) | A boss-mod style warning when your group's loot is Free for All |
 
 ## Install
 
@@ -62,6 +63,15 @@ them from addons until then). If several people in the group have it, only one p
 `/breport` opens its settings (also under Esc > Options > AddOns): on/off, damage, healing, wipes,
 players per list and where to post (party or raid, guild, say or just you), plus buttons to show the
 last fight's report to yourself or post it. `/breport help` lists the chat commands.
+
+## Loot Alert
+
+Warns you when your group's loot is set to Free for All, like a boss-mod alert: big text in the
+middle of the screen, the raid-warning sound and a chat line. It only warns inside dungeons and raids
+while you're in a party or raid group. It checks when you enter one, join a group or the loot method
+changes, and again when a boss is pulled. If you're the group leader it offers to switch to Group
+Loot (never in combat, and "Keep it" is remembered). `/lootalert` opens its settings: sound, on-screen
+text, the switch offer, the boss-pull reminder and Round Robin warnings. `/lootalert test` shows the warning.
 
 ---
 
