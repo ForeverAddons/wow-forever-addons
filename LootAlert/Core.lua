@@ -1,18 +1,17 @@
 -- Loot Alert: warns you when your group's loot is set to Free for All, like a boss-mod alert:
--- big text in the middle of the screen, the raid-warning sound and a chat line. If you're the
--- group leader it offers to switch to Group Loot.
+-- big text in the middle of the screen, the raid-warning sound and a chat line. Only in dungeons
+-- and raids, and only while you're in a party or raid group. If you're the group leader it offers
+-- to switch to Group Loot.
 local ADDON = ...
 
 local DEFAULTS = {
   enabled = true,
-  where = "instances",  -- instances (dungeons and raids) or anywhere (any group)
   sound = true,
   screen = true,        -- big text in the middle of the screen
   offer = true,         -- leader: offer to switch to Group Loot
   onPull = true,        -- warn again when a boss is pulled
   roundRobin = false,   -- also warn for Round Robin
 }
-local WHERE = { instances = true, anywhere = true }
 
 -- Enum.LootMethod on this client: 0 Free for All, 1 Round Robin, 2 Master Looter, 3 Group, 4 Need before Greed, 5 Personal
 local LM = Enum and Enum.LootMethod or {}
@@ -70,10 +69,10 @@ local function BadMethodAnywhere()
   if m == FFA or (m == ROUND_ROBIN and DB.roundRobin) then return m end
 end
 
+-- Only inside a dungeon or raid instance.
 local function InScope()
-  if DB.where ~= "instances" then return true end
   local inInstance, kind = IsInInstance()
-  return inInstance and (kind == "party" or kind == "raid")
+  return inInstance and (kind == "party" or kind == "raid") or false
 end
 
 -- The loot method to warn about here and now, or nil.
@@ -178,7 +177,7 @@ f:SetScript("OnEvent", function(_, event, a1)
     LootAlertDB = LootAlertDB or {}
     DB = LootAlertDB
     for k, v in pairs(DEFAULTS) do if DB[k] == nil then DB[k] = v end end
-    if not WHERE[DB.where] then DB.where = "instances" end
+    DB.where = nil -- an old option: Loot Alert now only warns in dungeons and raids
     local ok, err = pcall(RegisterSettings)
     if not ok then Print("couldn't add the settings page: " .. tostring(err)) end
     return
@@ -202,15 +201,13 @@ end)
 -- Settings page: Esc > Options > AddOns > Loot Alert
 ----------------------------------------------------------------------
 local OPTIONS = {
-  { "enabled", "boolean", "Enable Loot Alert", "Turns Loot Alert on or off. When it's off you get no warnings and the options below are greyed out." },
-  { "where", "string", "Warn me", "Where to check the loot method." },
+  { "enabled", "boolean", "Enable Loot Alert", "Warns you in dungeons and raids, while you're in a group, when the loot is Free for All. When it's off you get no warnings and the options below are greyed out." },
   { "screen", "boolean", "Big text on screen", "Shows the warning in the middle of the screen, like a raid warning." },
   { "sound", "boolean", "Warning sound", "Plays the raid-warning sound." },
   { "offer", "boolean", "Offer to switch to Group Loot", "When you're the group leader, a window offers to change the loot to Group Loot." },
   { "onPull", "boolean", "Warn again when a boss is pulled", "If the loot is still Free for All when a boss fight starts, warn again." },
   { "roundRobin", "boolean", "Also warn for Round Robin", "Round Robin hands each corpse's loot to one player in turn, so you may want a warning for it too." },
 }
-local WHERE_NAMES = { { "instances", "In dungeons and raids" }, { "anywhere", "Anywhere in a group" } }
 
 local category
 function RegisterSettings()
@@ -222,18 +219,7 @@ function RegisterSettings()
     local key, kind, label, tip = unpack(o)
     local setting = Settings.RegisterAddOnSetting(category, "LootAlert_" .. key, key, DB, kind, label, DEFAULTS[key])
     settingFor[key] = setting
-    local init
-    if kind == "boolean" then
-      init = Settings.CreateCheckbox(category, setting, tip)
-    else
-      local function Choices()
-        local c = Settings.CreateControlTextContainer()
-        for _, w in ipairs(WHERE_NAMES) do c:Add(w[1], w[2]) end
-        return c:GetData()
-      end
-      local create = Settings.CreateDropdown or Settings.CreateDropDown
-      if create then init = create(category, setting, Choices, tip) end
-    end
+    local init = Settings.CreateCheckbox(category, setting, tip)
     if key == "enabled" then
       master = init
     elseif master and type(init) == "table" and init.SetParentInitializer then
@@ -263,8 +249,7 @@ local function CurrentName()
 end
 
 local function Help()
-  Print(string.format("%s, %s. Loot right now: %s.", OnOff(DB.enabled),
-    DB.where == "anywhere" and "anywhere in a group" or "in dungeons and raids", CurrentName()))
+  Print(string.format("%s (in dungeons and raids, while in a group). Loot right now: %s.", OnOff(DB.enabled), CurrentName()))
   print("  /lootalert                  settings window")
   print("  /lootalert on | off         turn warnings on or off")
   print("  /lootalert test             show the warning")
@@ -283,7 +268,13 @@ SlashCmdList.LOOTALERT = function(msg)
     Warn(FFA, true)
   elseif cmd == "check" then
     local m = BadMethod()
-    if m then lastKey = Key(m); Warn(m) else Print("loot right now: " .. CurrentName() .. ". Nothing to warn about.") end
+    if m then
+      lastKey = Key(m); Warn(m)
+    elseif IsInGroup() and not InScope() then
+      Print("loot right now: " .. CurrentName() .. ". Loot Alert only warns inside dungeons and raids.")
+    else
+      Print("loot right now: " .. CurrentName() .. ". Nothing to warn about.")
+    end
   elseif cmd == "group" then
     SetGroupLoot()
   elseif cmd == "" or cmd == "settings" or cmd == "options" then

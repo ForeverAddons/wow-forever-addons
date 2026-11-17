@@ -67,12 +67,11 @@ last fight's report to yourself or post it. `/breport help` lists the chat comma
 ## Loot Alert
 
 Warns you when your group's loot is set to Free for All, like a boss-mod alert: big text in the
-middle of the screen, the raid-warning sound and a chat line. It checks when you enter a dungeon or
-raid, join a group or the loot method changes, and again when a boss is pulled. If you're the group
-leader it offers to switch to Group Loot (never in combat, and "Keep it" is remembered).
-`/lootalert` opens its settings: where to warn (dungeons and raids, or anywhere in a group), sound,
-on-screen text, the switch offer, the boss-pull reminder and Round Robin warnings. `/lootalert test`
-shows the warning.
+middle of the screen, the raid-warning sound and a chat line. It only warns inside dungeons and raids
+while you're in a party or raid group. It checks when you enter one, join a group or the loot method
+changes, and again when a boss is pulled. If you're the group leader it offers to switch to Group
+Loot (never in combat, and "Keep it" is remembered). `/lootalert` opens its settings: sound, on-screen
+text, the switch offer, the boss-pull reminder and Round Robin warnings. `/lootalert test` shows the warning.
 
 ---
 
