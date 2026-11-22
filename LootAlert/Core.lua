@@ -87,8 +87,10 @@ end
 local declined      -- the leader clicked "Keep it": no more offers or pull reminders until the loot method or group changes
 local offerWaiting  -- an offer held back until combat ends
 
-StaticPopupDialogs = StaticPopupDialogs or {}
-StaticPopupDialogs.LOOTALERT_CHANGE = {
+-- Only add our entry: never assign the StaticPopupDialogs global itself. Reassigning it (even to the
+-- same table) taints the global, and every Blizzard function that opens, closes or checks a popup
+-- then runs tainted, which breaks secret values in the character frame, action bars and more.
+StaticPopupDialogs["LOOTALERT_CHANGE"] = {
   text = "Loot is set to %s.\nChange it to Group Loot?",
   button1 = "Group Loot",
   button2 = "Keep it",
