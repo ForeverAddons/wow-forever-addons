@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: Loot Alert
+## Notes: Warns you, like a boss-mod alert, when your group's loot is set to Free for All.
+## Author: Jahleel
+## Version: 0.1.0
+## SavedVariables: LootAlertDB
+## Category: Group
+
+Core.lua
