@@ -192,10 +192,10 @@ local function Place(ctx, cand, uiMapID, x, y)
     end
 end
 
-local function FromDatabase(ctx, itemID, out, seen)
-    local vendors = VendorIDs(itemID)
-    if type(vendors) ~= "table" then return end
-    for _, npcID in ipairs(vendors) do
+-- Each NPC in npcIDs at its spawn nearest to you (other-faction NPCs left out unless that option is on).
+local function FromDatabase(ctx, npcIDs, out, seen)
+    if type(npcIDs) ~= "table" then return end
+    for _, npcID in ipairs(npcIDs) do
         local name, sub, friendly, points = NpcInfo(npcID)
         local hostile = ctx.faction and friendly and not friendly:find(ctx.faction, 1, true)
             and not (ns.db and ns.db.otherFaction)
@@ -242,7 +242,7 @@ function V.Lookup(itemID)
     local ctx = PlayerContext()
     local list, seen = {}, {}
     FromVisited(ctx, itemID, list, seen)
-    FromDatabase(ctx, itemID, list, seen)
+    FromDatabase(ctx, VendorIDs(itemID), list, seen)
 
     local zones, byName = {}, {}
     for _, c in ipairs(list) do
@@ -271,6 +271,38 @@ function V.Lookup(itemID)
     end)
     return zones, #list
 end
+
+local function Nearer(a, b)
+    if (a.map ~= nil) ~= (b.map ~= nil) then return a.map ~= nil end -- ones you can put a waypoint on first
+    -- real distance wins: a trainer just over the zone line beats a far one in your zone
+    if a.dist and b.dist and a.dist ~= b.dist then return a.dist < b.dist end
+    if (a.dist ~= nil) ~= (b.dist ~= nil) then return a.dist ~= nil end
+    if a.isHere ~= b.isHere then return a.isHere end
+    return (a.name or "") < (b.name or "")
+end
+
+-- Where to find any of these NPCs (recipe vendors, trainers, quest givers), nearest first:
+-- a list of candidates like V.Lookup's vendors. A vendor you've opened yourself counts where you saw it.
+function V.NpcPlaces(npcIDs)
+    local ctx = PlayerContext()
+    local list, seen = {}, {}
+    for _, npcID in ipairs(npcIDs) do
+        local v = ns.db and ns.db.vendors and ns.db.vendors[npcID]
+        if v and v.map and not seen[npcID] then
+            local cand = { npcID = npcID, name = v.name, sub = v.sub, source = "visited" }
+            Place(ctx, cand, v.map, v.x, v.y)
+            seen[npcID] = true
+            list[#list + 1] = cand
+        end
+    end
+    FromDatabase(ctx, npcIDs, list, seen)
+    for _, c in ipairs(list) do c.isHere = c.zoneName ~= nil and c.zoneName == ctx.zoneName end
+    table.sort(list, Nearer)
+    return list
+end
+
+-- The NPC info Reagent Scout knows (name, subName, friendlyTo, spawn points), or nil.
+V.NpcInfo = NpcInfo
 
 function V.Price(itemID)
     return ns.db and ns.db.prices[itemID]
