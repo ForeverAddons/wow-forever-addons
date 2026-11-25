@@ -17,6 +17,8 @@ O.list = {
         "How many zones the hover tooltip lists, nearest first.", 1, 6, 1 },
     { "tooltipVendors", "number", 3, "Vendors per zone when hovering",
         "How many vendors the hover tooltip lists in each zone, nearest first.", 1, 6, 1 },
+    { "whatsTraining", "boolean", true, "Waypoints from What's Training?",
+        "With What's Training? installed: click a recipe in its \"What can I train?\" list to set a waypoint to the nearest vendor, trainer or quest giver that teaches it." },
 }
 
 -- Fill in anything missing, so the addon works even if the settings page can't be built.

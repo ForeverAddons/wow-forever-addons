@@ -2,8 +2,8 @@
 ## Title: Reagent Scout
 ## Notes: Shows which vendors sell the reagents for the recipe you have selected, closest first.
 ## Author: Jahleel
-## Version: 0.3.0
-## OptionalDeps: QuestieDB, Questie, TomTom
+## Version: 0.4.0
+## OptionalDeps: QuestieDB, Questie, TomTom, WhatsTraining
 ## LoadSavedVariablesFirst: 1
 ## SavedVariables: ReagentScoutDB
 ## Category: Professions
@@ -14,3 +14,4 @@ Data.lua
 Vendors.lua
 Professions.lua
 Panel.lua
+WhatsTraining.lua

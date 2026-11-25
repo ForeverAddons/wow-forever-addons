@@ -26,6 +26,12 @@ Under each vendor-bought reagent in the profession window: its price and the zon
 nearest vendor (green = close, yellow = medium, gray = far). Hover for more vendors, click to
 set a waypoint. `/rscout` for settings.
 
+With the What's Training? addon installed, click a recipe in its
+"What can I train?" list to set a waypoint (TomTom, or the game's map pin) to the nearest place to
+learn it: a vendor that sells it, a trainer of that profession, or the quest giver. Hover a recipe to
+see where that is. Works best with QuestieDB: it knows where every trainer, quest giver and
+recipe vendor stands (without it, only vendors you've opened and reagent vendors are known).
+
 ## DamageBot
 
 A bar for each enemy in combat with you, with name, health and your DoT icons in the corner.
