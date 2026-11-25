@@ -10,6 +10,7 @@ Addons I made for the **WoW Forever** client (interface 16001).
 | [Death Reason](#death-reason) | When you die: your last 10 hits, who hit you and with what |
 | [Boss Report](#boss-report) | After each boss kill: top damage and healing posted to party or raid chat |
 | [Loot Alert](#loot-alert) | A boss-mod style warning when your group's loot is Free for All |
+| [SkillRoute](#skillroute) | Profession levelling routes and skill-up chances, priced with CraftCost (a fork of SkillUp Forever) |
 
 ## Install
 
@@ -73,6 +74,15 @@ changes, and again when a boss is pulled. If you're the group leader it offers t
 Loot (never in combat, and "Keep it" is remembered). `/lootalert` opens its settings: sound, on-screen
 text, the switch offer, the boss-pull reminder and Round Robin warnings. `/lootalert test` shows the warning.
 
+## SkillRoute
+
+A fork of cjber's [SkillUp Forever](https://github.com/cjber/skillup-forever): skill-up chances, colour thresholds
+and costs on every recipe, a levelling route to the skill you choose, shopping lists, crafted gear and buffs, all in
+the Professions window. On top of SkillUp Forever it takes auction prices from CraftCost first, treats the Working
+Overtime Legacy talent as a multiplier on your skill-up chance (on by default), and stretches the tooltip skill
+bar's orange band to where a skill-up is still certain, with your chance beside your skill. Disable SkillUp Forever
+when you install it. `/skillroute` for settings. See [SkillRoute/README.md](SkillRoute/README.md).
+
 ---
 
 ## Other addons I use
@@ -105,4 +115,6 @@ text, the switch offer, the boss-pull reminder and Round Robin warnings. `/loota
 ## License
 
 GPLv3 (see [LICENSE](LICENSE)). Reagent Scout's vendor data comes from
-[QuestieDB](https://github.com/Questie/QuestieDB), which is GPLv3.
+[QuestieDB](https://github.com/Questie/QuestieDB), which is GPLv3. SkillRoute is a fork of
+[SkillUp Forever](https://github.com/cjber/skillup-forever) by cjber (GPL-3.0-or-later); its third-party data
+credits are in [SkillRoute/THIRD_PARTY.md](SkillRoute/THIRD_PARTY.md).
