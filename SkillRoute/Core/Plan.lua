@@ -630,6 +630,85 @@ function ns.UnlearnedRecipes(profession)
 	return found
 end
 
+-- The cheapest recipes to skill up with at the current skill, as CraftCost's "Recommended to level" lists them:
+-- learned ones, and unlearned ones a trainer teaches or a vendor sells that this character can learn now. Each is
+-- ranked the way the planner ranks a step at this skill (Model.Rank): the crafts that make the next skill-up 95%
+-- likely, each at its net cost and time, except that a profitable recipe's extra crafts still pay their reagents,
+-- so a near-grey recipe cannot look free (#400, #466). A learning fee is shown, not added: it is paid once.
+-- Skipped recipes, unpriced ones and `exclude` (the route's own next craft) are left out. Nothing at the cap.
+---@param profession SkillUpContext
+---@param limit integer
+---@param exclude integer?
+---@return SkillUpNextBest[]
+function ns.NextBest(profession, limit, exclude)
+	if not profession or profession.capped or not profession.skillLine then
+		return {}
+	end
+	local skill, level = profession.skill, UnitLevel("player") or 0
+	local found = {}
+	for _, recipeID in ipairs(RecipesOf(profession.skillLine)) do
+		-- Grey or unknown recipes are dropped before anything asks where they are learned or what they cost.
+		local raw = ns.Model.Get(recipeID)
+		if raw and raw[4] > skill and recipeID ~= exclude and not Skipped(recipeID) then
+			local learned = ns.IsLearned(recipeID)
+			local source, fee
+			if not learned then
+				source = ns.LearnSource(profession, recipeID)
+				if source and source.skill <= skill and not (source.level and source.level > level) then
+					if source.kind == "trainer" then
+						local training = ns.TrainingFor(profession, recipeID)
+						fee = training and training[1]
+					else
+						local bought = VendorTraining(recipeID)
+						fee = bought and bought[1]
+						if not fee then
+							source = nil -- a pattern no known vendor sells is not something to go and learn now
+						end
+					end
+				else
+					source = nil
+				end
+			end
+			if learned or source then
+				local t = ns.RangeThresholds(profession, recipeID)
+				local chance = t and ns.Model.Chance(t, skill)
+				if chance and chance > 0 then
+					local reagentCost, _, net = RecipeCosts(recipeID)
+					local ups = math.max(ns.RecipeSkillUps and ns.RecipeSkillUps(recipeID) or 1, 1)
+					local perPoint = net
+						and ns.Model.RankKey({ thresholds = t, netCost = net, reagentCost = reagentCost, skillUps = ups }, skill)
+					if perPoint then
+						found[#found + 1] = {
+							recipeID = recipeID,
+							thresholds = t,
+							chance = chance,
+							perPoint = perPoint,
+							color = ns.Model.Color(t, skill),
+							learned = learned and true or false,
+							source = source or nil,
+							fee = fee,
+						}
+					end
+				end
+			end
+		end
+	end
+	table.sort(found, function(a, b)
+		if a.perPoint ~= b.perPoint then
+			return a.perPoint < b.perPoint
+		elseif a.chance ~= b.chance then
+			return a.chance > b.chance
+		elseif a.learned ~= b.learned then
+			return a.learned
+		end
+		return a.recipeID < b.recipeID
+	end)
+	for i = #found, limit + 1, -1 do
+		found[i] = nil
+	end
+	return found
+end
+
 -- Each difficulty band a recipe still has and the skill it starts at, from where the recipe can
 -- be learned. Empty without thresholds.
 ---@param profession SkillUpContext

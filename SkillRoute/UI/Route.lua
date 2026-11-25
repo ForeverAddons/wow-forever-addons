@@ -508,6 +508,88 @@ local function RenderSuggestions(list, plan)
 	end
 end
 
+local NEXT_BEST_SHOWN = 3
+
+---@param tooltip GameTooltip
+---@param profession SkillUpProfession
+---@param pick SkillUpNextBest
+local function NextBestTooltip(tooltip, profession, pick)
+	local recipeID = pick.recipeID
+	RecipeTitle(tooltip, recipeID, RecipeName(recipeID))
+	AddLine(tooltip, L["Skill-up chance"], string.format("%d%%", math.floor(pick.chance * 100 + 0.5)))
+	AddLine(tooltip, L["Per skill point"], ns.FormatSigned(math.abs(pick.perPoint), pick.perPoint < 0))
+	if pick.source then
+		-- In base skill, as the heading and the Professions window show it.
+		AddLine(tooltip, L["Learn"], ns.LearnSourceText({
+			kind = pick.source.kind,
+			skill = pick.source.skill - (profession.modifier or 0),
+			level = pick.source.level,
+		}))
+		if pick.fee then
+			AddLine(tooltip, pick.source.kind == "trainer" and L["Fee"] or L["Price"], Money(pick.fee))
+		end
+	end
+	AddBands(tooltip, profession, recipeID)
+	AddToolLines(tooltip, recipeID)
+	GameTooltip_AddBlankLineToTooltip(tooltip)
+	AddReagentLines(tooltip, recipeID, 1)
+	if pick.source and pick.source.kind == "trainer" then
+		ns.AddRecipeTrainer(tooltip, profession, recipeID)
+	elseif pick.source then
+		ns.AddNearest(tooltip, L["Nearest vendor"], ns.NearestScrollVendor(recipeID, true))
+	elseif profession.skillLine == ns.OpenSkillLine() then
+		GameTooltip_AddInstructionLine(tooltip, L["Click to open the recipe."])
+	end
+	AddSkipHint(tooltip)
+end
+
+-- Beside the route's one pick, the next cheapest recipes at the current skill, learned or learnable now.
+---@param list SkillUpList
+---@param plan SkillUpPlan
+local function RenderNextBest(list, plan)
+	local profession = plan.profession
+	local current = plan.crafts[1]
+	local picks = ns.NextBest(profession, NEXT_BEST_SHOWN, current and current.recipeID)
+	if #picks == 0 then
+		return
+	end
+	list:Message(string.format(L["Other options at %d:"], profession.base or profession.skill), NORMAL_FONT_COLOR)
+	for _, pick in ipairs(picks) do
+		local detail = string.format(
+			L["%d%%, %s a point"],
+			math.floor(pick.chance * 100 + 0.5),
+			ns.FormatSigned(ns.Model.RoundMoney(math.abs(pick.perPoint)), pick.perPoint < 0)
+		)
+		if pick.source then
+			detail = string.format(
+				L["%s, learn: %s"],
+				detail,
+				pick.fee and Money(pick.fee)
+					or ns.LearnSourceText({
+						kind = pick.source.kind,
+						skill = pick.source.skill - (profession.modifier or 0),
+						level = pick.source.level,
+					})
+			)
+		end
+		list:Add({
+			icon = RecipeIcon(pick.recipeID),
+			text = RecipeName(pick.recipeID),
+			detail = detail,
+			color = ns.COLORS[pick.color] or NORMAL_FONT_COLOR,
+			tooltip = function(tooltip)
+				NextBestTooltip(tooltip, profession, pick)
+			end,
+			click = pick.source
+					and (pick.source.kind == "trainer" and TrainerClick(profession, pick.recipeID) or ScrollClick(
+						pick.recipeID
+					))
+				or RecipeClick(pick.recipeID),
+			menu = RecipeMenu(pick.recipeID),
+		})
+	end
+end
+
 ---@param list SkillUpList
 ---@param plan SkillUpPlan
 local function RenderRoute(list, plan)
@@ -628,6 +710,7 @@ local function RenderRoute(list, plan)
 	if #plan.crafts > 0 then
 		list:Message(ns.RouteSparesNote(), ns.COLORS.unknown)
 	end
+	RenderNextBest(list, plan)
 	RenderPinned(list, plan)
 	RenderSkipped(list, profession)
 end

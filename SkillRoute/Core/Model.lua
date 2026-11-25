@@ -600,6 +600,9 @@ local function Rank(recipe, skill)
 	return (cost or 0) / ups, chance
 end
 
+-- The same key for a list that ranks recipes at one skill beside the route (ns.NextBest).
+Model.RankKey = Rank
+
 -- Among recipes that can gain skill, the most recent pin wins; otherwise a cheaper point, then a better
 -- chance, then a buff the player can use, then the lower recipe ID. A tie keeps the best so far.
 ---@param recipe SkillUpCandidate

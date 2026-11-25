@@ -9,6 +9,12 @@ local L = setmetatable({}, {
 	end,
 })
 L["CraftCost"] = "CraftCost"
+L["Other options at %d:"] = "Other options at %d:"
+L["%d%%, %s a point"] = "%d%%, %s a point"
+L["%s, learn: %s"] = "%s, learn: %s"
+L["Skill-up chance"] = "Skill-up chance"
+L["Per skill point"] = "Per skill point"
+L["Learn"] = "Learn"
 L["CraftCost, %s"] = "CraftCost, %s"
 L["Latest CraftCost prices."] = "Latest CraftCost prices."
 L["Latest CraftCost prices: rescan to update old prices."] = "Latest CraftCost prices: rescan to update old prices."
